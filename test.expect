@@ -1,0 +1,289 @@
+--- multilog prints nothing with no actions
+0
+--- multilog e prints to stderr
+one
+two
+0
+--- multilog inserts newline after partial final line
+one
+two
+0
+--- multilog handles multiple actions
+one
+one
+two
+two
+0
+--- multilog handles wildcard -
+0
+--- multilog handles literal +
+one
+0
+--- multilog handles long lines for stderr
+0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678
+0
+01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+0
+01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789...
+0
+--- multilog handles status files
+0
+_1_two
+_997_
+--- multilog t has the right format on stderr
+@xxxxxxxxxxxxxxxxxxxxxxxx ONE
+@xxxxxxxxxxxxxxxxxxxxxxxx TWO
+--- multilog t has the right format in status files
+0
+@xxxxxxxxxxxxxxxxxxxxxxxx TWO
+--- multilog t ./x has the right format
+0
+@xxxxxxxxxxxxxxxxxxxxxxxx ONE
+@xxxxxxxxxxxxxxxxxxxxxxxx TWO
+--- multilog ./x inserts newline after partial final line
+0
+one
+two
+--- multilog ./x handles overlong lines
+0
+1234567890abcdef
+123456
+123456123456
+123
+--- multilog t ./x handles overlong lines
+0
+@xxxxxxxxxxxxxxxxxxxxxxxx ABCDEFGIHJKLMNOP
+@xxxxxxxxxxxxxxxxxxxxxxxx ABCDEF
+@xxxxxxxxxxxxxxxxxxxxxxxx ABCDEFABCDEF
+@xxxxxxxxxxxxxxxxxxxxxxxx ABC
+--- multilog t ./x handles overlong lines
+0
+@xxxxxxxxxxxxxxxxxxxxxxxx ABCDEFGIHJKLMNOP
+@xxxxxxxxxxxxxxxxxxxxxxxx ABCDEF
+@xxxxxxxxxxxxxxxxxxxxxxxx ABCDEFABCDEF
+@xxxxxxxxxxxxxxxxxxxxxxxx ABC
+--- multilog ./x s4096 works
+0
+0123456789abcde
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+*
+0010000
+--- multilog ./x s4096 n3 works
+0
+0123456789abcde
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+*
+0020000
+--- multilog ./x s4096 n2 works
+0
+0123456789abcde
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+*
+0010000
+--- multilog ./x s8192 n2 works
+0
+0123456789abcde
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+*
+0020000
+--- multilog ./x s8192 n2 works
+0
+0123456789abcde
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+*
+0020000
+--- multilog ./x !sed work
+0
+0123456789abcde
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 66 0a
+*
+0010000
+--- multilog ./x !sed works with state
+0
+
+current:
+state:ffffff
+
+od:
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+*
+0010000
+--- multilog ./x ! repeats if processor fails
+0
+0123456789abcde
+done
+testflag set
+0000000 64 6f 6e 65 0a
+0000005
+--- multilog ./x continues cleanly after stop
+0
+current has x bit
+0
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+*
+0000040
+--- multilog ./x continues cleanly after crash
+0
+0
+current has x bit
+current:
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+0000020
+.u:
+0000000 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 0a
+0000020
+--- multilog n1 is corrected to 2
+0
+current:
+0000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 0a
+0000020
+.s:
+0000000 31 31 31 31 31 31 31 31 31 31 31 31 31 31 31 0a
+0000020 61 61 61 61 61 61 61 61 61 61 61 61 61 0a
+0000036
+--- multilog -a* deselects
+--- multilog +* selects everything
+anything
+--- multilog handles negative size or number
+failed to parse s-999: strconv.ParseUint: parsing "-999": invalid syntax
+1
+failed to parse n-999: strconv.ParseUint: parsing "-999": invalid syntax
+1
+--- multilog parses facility.severity
+0
+failed to parse severity emer (kern.emer)
+1
+failed to parse severity emergx (kern.emergx)
+1
+0
+failed to parse severity aler (kern.aler)
+1
+failed to parse severity alertx (kern.alertx)
+1
+0
+failed to parse severity cri (kern.cri)
+1
+failed to parse severity critx (kern.critx)
+1
+0
+failed to parse severity er (kern.er)
+1
+failed to parse severity errx (kern.errx)
+1
+0
+failed to parse severity warnin (kern.warnin)
+1
+failed to parse severity warningx (kern.warningx)
+1
+0
+failed to parse severity inf (kern.inf)
+1
+failed to parse severity infox (kern.infox)
+1
+0
+failed to parse severity debu (kern.debu)
+1
+failed to parse severity debugx (kern.debugx)
+1
+0
+failed to parse facility ker (ker.debug)
+1
+failed to parse facility kernx (kernx.debug)
+1
+0
+failed to parse facility use (use.debug)
+1
+failed to parse facility userx (userx.debug)
+1
+0
+failed to parse facility mai (mai.debug)
+1
+failed to parse facility mailx (mailx.debug)
+1
+0
+failed to parse facility daemo (daemo.debug)
+1
+failed to parse facility daemonx (daemonx.debug)
+1
+0
+failed to parse facility aut (aut.debug)
+1
+failed to parse facility authx (authx.debug)
+1
+0
+failed to parse facility syslo (syslo.debug)
+1
+failed to parse facility syslogx (syslogx.debug)
+1
+0
+failed to parse facility lp (lp.debug)
+1
+failed to parse facility lprx (lprx.debug)
+1
+0
+failed to parse facility new (new.debug)
+1
+failed to parse facility newsx (newsx.debug)
+1
+0
+failed to parse facility uuc (uuc.debug)
+1
+failed to parse facility uucpx (uucpx.debug)
+1
+0
+failed to parse facility cro (cro.debug)
+1
+failed to parse facility cronx (cronx.debug)
+1
+0
+failed to parse facility authpri (authpri.debug)
+1
+failed to parse facility authprivx (authprivx.debug)
+1
+0
+failed to parse facility ft (ft.debug)
+1
+failed to parse facility ftpx (ftpx.debug)
+1
+0
+failed to parse facility nt (nt.debug)
+1
+failed to parse facility ntpx (ntpx.debug)
+1
+0
+failed to parse facility audi (audi.debug)
+1
+failed to parse facility auditx (auditx.debug)
+1
+0
+failed to parse facility lp (lp.debug)
+1
+failed to parse facility lprx (lprx.debug)
+1
+0
+failed to parse facility local (local.debug)
+1
+failed to parse facility local0x (local0x.debug)
+1
+failed to parse facility local8 (local8.debug)
+1
+0
+failed to parse severity .debu
+1
+0
+failed to parse facility use
+1
+--- multilog t t- works
+@xxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxx
+0
+0123456789abcde
+0
+--- multilog tbad fails
+unable to understand tbad
+1
+--- multilog i is known
+0123456789abcde
+0
+--- multilog $ is unknown
+unable to understand $
+1

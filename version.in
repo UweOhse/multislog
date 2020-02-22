@@ -1,0 +1,3 @@
+package main
+
+var versionString string = "VVVVV (git GGGGG)"
