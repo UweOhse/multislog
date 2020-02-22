@@ -4,17 +4,12 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	// "io/ioutil"
 	"log"
-	// "bufio"
 	"syscall"
 	"os"
 	"errors"
 	"os/signal"
 	"strconv"
-	"time"
-	// 	"strings"
-	// "time"
 	syslog "github.com/RackSec/srslog"
 )
 
@@ -30,6 +25,7 @@ const (
 	acAction
 	acSelect
 	acDeSelect
+	acDone
 )
 
 type outputDesc struct {
@@ -96,32 +92,34 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 			}
 		}
 
-		if gotEOF && 0==len(sd.line) {
+		if gotEOF && len(sd.line)==0 {
 			break
 		}
 		if len(sd.line)==0 {
 			continue
 		}
-		curTaiaTimestamp, curTime=timestamp()
+		curTaiaTimestamp=timestamp()
 
 		/* part2: select channels */
 		selected := true
-		for i := 0; i < len(script); i++ {
+		var done=false
+		for i := 0; i < len(script) && !done; i++ {
 			typ:=script[i].typ
 			switch {
 			case typ==acSelect:
 				if !selected && match(script[i].selector,string(sd.line)) {
 					selected=true
 				}
-				continue
 			case typ==acDeSelect:
 				if selected && match(script[i].selector,string(sd.line)) {
 					selected=false
 				}
-				continue
 			case typ==acAction:
 				script[i].selected=selected;
-				continue;
+			case typ==acDone:
+				if selected {
+					done=true
+				}
 			}
 		}
 		/* part3: writing the first part. */
@@ -137,17 +135,15 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 			if sd.isComplete || gotEOF{
 				break
 			}
-			select {
 			// not wantFlush, not exitChan, not errChan
-			case sd, ok = <-readChan:
-				if !ok {
-					gotEOF=true
-				}
-				for i := 0; i < len(script); i++ {
-					if script[i].selected {
-						if script[i].desc!=nil && script[i].desc.sendContinue!=nil {
-							script[i].desc.sendContinue(&script[i], sd.line)
-						}
+			sd, ok = <-readChan
+			if !ok {
+				gotEOF=true
+			}
+			for i := 0; i < len(script); i++ {
+				if script[i].selected {
+					if script[i].desc!=nil && script[i].desc.sendContinue!=nil {
+						script[i].desc.sendContinue(&script[i], sd.line)
 					}
 				}
 			}
@@ -162,8 +158,6 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 		}
 	}
 }
-
-
 
 
 func setupScript() {
@@ -239,6 +233,11 @@ func setupScript() {
 			n.desc = newSyslogOutputDesc()
 		case 'p':
 			priority = parsePriority(os.Args[i][1:])
+		case 'd':
+			if len(os.Args[i])>1 {
+				log.Fatalf("unable to understand %s\n", os.Args[i])
+			}
+			n.typ=acDone;
 		default:
 			log.Fatalf("unable to understand %s\n", os.Args[i])
 		}
@@ -263,7 +262,8 @@ type syncReadData struct {
 	isComplete bool
 	line []byte
 }
-func makeReadChan(r io.Reader, bufSize int) (chan syncReadData, chan error) {
+
+func makeReadChan(r io.Reader, bufSize int) (datachan chan syncReadData, errchan chan error) {
 	readc := make(chan syncReadData,1)
 	errc := make(chan error, 1)
 	go func() {
@@ -271,7 +271,7 @@ func makeReadChan(r io.Reader, bufSize int) (chan syncReadData, chan error) {
 		readbuf := make([]byte, Buflen)
 		for {
 			sd := new(syncReadData)
-			sd.line=*new([]byte)
+			sd.line=[]byte(nil)
 			n, err := r.Read(readbuf)
 			if n!= 0 {
 				curbuf=append(curbuf,readbuf[:n]...)
@@ -305,7 +305,6 @@ func makeReadChan(r io.Reader, bufSize int) (chan syncReadData, chan error) {
 			}
 			if len(curbuf)>=Buflen {
 				sd.line=append(sd.line, curbuf...)
-				// sd.line=curbuf
 				sd.isComplete=false
 				curbuf=curbuf[:0]
 				readc <- *sd
