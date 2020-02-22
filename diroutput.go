@@ -82,75 +82,96 @@ func dirOpenFinish(priv *dirOutputPrivate, fd *os.File, sz int64) {
 	priv.bytesWritten=sz
 	priv.writer=bufio.NewWriterSize(fd,Buflen+4096)
 }
+
+func chdirLoop(fd *os.File, fn string) {
+	for {
+		err := fd.Chdir();
+		if err==nil {
+			return
+		}
+		log.Printf("unable to fchdir to %s, pausing: %v\n",fn, err)
+		time.Sleep(time.Second);
+	}
+}
+func closeLogger(fd *os.File, fn string) {
+	err := fd.Close();
+	if err==nil {
+		return
+	}
+	// cannot retry: the kernel may have freed / reused the resource (think other threads).
+	log.Printf("unable to close %s: %v\n",fn, err)
+}
+
+// log.Fatal really is overused, but there is not much we can do.
 func dirOpen(sc *scriptLine) {
 	priv := (*dirOutputPrivate)(sc.desc.private.(*dirOutputPrivate))
 
 	oldDir, err:=os.Open(".");
 	if err!=nil {
-		log.Fatalf("unable to open current directory: %v\n",err);
+		log.Panicf("unable to open current directory: %v\n",err);
 	}
 	closeOnExec(oldDir);
 
-	os.Mkdir(sc.target,0700);
+	err = os.Mkdir(sc.target,0700);
+	if err!=nil && !errors.Is(err,os.ErrExist) {
+		log.Panicf("unable to mkdir target directory %s: %v\n",sc.target, err);
+	}
 	priv.workDir, err =os.Open(sc.target);
 	if err !=nil{
-		log.Fatalf("unable to open target directory %s: %v\n",sc.target, err);
+		log.Panicf("unable to open target directory %s: %v\n",sc.target, err);
 	}
 	closeOnExec(priv.workDir);
-	err = priv.workDir.Chdir();
+	chdirLoop(priv.workDir, sc.target);
 
-	if err !=nil{
-		log.Fatalf("unable to fchdir to %s: %v\n",sc.target, err);
-	}
-	defer oldDir.Chdir(); 
+	defer chdirLoop(oldDir, ".")
 
 	fdLock, err := openAppend("lock")
 	if err !=nil{
-		log.Fatalf("unable to create lock %s: %v\n",sc.target, err);
+		log.Panicf("unable to create lock %s: %v\n",sc.target, err);
 	}
 	err = unix.Flock(int(fdLock.Fd()), unix.LOCK_EX|unix.LOCK_NB)
 	if err != nil {
-		log.Fatalf("unable to lock %s: %v\n",sc.target, err);
+		log.Panicf("unable to lock %s: %v\n",sc.target, err);
         }
 	priv.fdLock=fdLock
 	closeOnExec(priv.fdLock);
 
 	st, err := os.Stat("current");
 	if err!=nil && !errors.Is(err,os.ErrNotExist) {
-		log.Fatalf("unable to stat %s/current: %v\n",sc.target, err);
+		log.Panicf("unable to stat %s/current: %v\n",sc.target, err);
 	}
 	if err == nil {
 		if (st.Mode() & 0100)!=0 {
 			// reuse old current file
 			fd, err := openAppend("current")
 			if err != nil {
-				log.Fatalf("unable to append to %s/current: %v\n",sc.target, err);
+				log.Panicf("unable to append to %s/current: %v\n",sc.target, err);
 			}
 			err=fd.Chmod(0644);
 			if err!=nil {
-				log.Fatalf("unable to set mode of %s/current: %v\n", sc.target, err);
+				log.Panicf("unable to set mode of %s/current: %v\n", sc.target, err);
 			}
 			dirOpenFinish(priv, fd, st.Size())
 			return
 		}
 	}
 
-	// os.Remove("state"); // why was this done?
-	os.Remove("newstate");
+	// why was this done: os.Remove("state");
+	removeLoop(sc, "newstate");
 
 	flagProcessed:=false
 	st, err = os.Stat("processed");
 	if err!=nil && !errors.Is(err,os.ErrNotExist) {
-		log.Fatalf("unable to stat %s/processed: %v\n",sc.target, err);
+		log.Panicf("unable to stat %s/processed: %v\n",sc.target, err);
 	}
 	if err==nil && (st.Mode()&0100)!=0 {
 		flagProcessed=true
 	}
 	if flagProcessed {
-		os.Remove("previous")
+		removeLoop(sc, "previous")
 		dirFinish(sc,"processed","s")
 	} else {
-		os.Remove("processed")
+		removeLoop(sc, "processed")
 		dirFinish(sc,"previous","u")
 	}
 	dirFinish(sc,"current","u")
@@ -160,18 +181,20 @@ func dirOpen(sc *scriptLine) {
 		fd, err = openTrunc("state");
 	}
 	if err != nil {
-		log.Fatalf("unable to write to %s/state: %v\n",sc.target, err)
+		log.Panicf("unable to open %s/state: %v\n",sc.target, err)
 	}
-	fd.Stat();
-	fd.Close()
+	err = fd.Close()
+	if err != nil { // ECANTHAPPEN, really
+		log.Panicf("unable to close %s/state: %v\n",sc.target, err)
+	}
 
 	fd, err = openAppend("current");
 	if err != nil {
-		log.Fatalf("unable to write to %s/current: %v\n",sc.target, err)
+		log.Panicf("unable to write to %s/current: %v\n",sc.target, err)
 	}
 	err = fd.Chmod(0644);
 	if err != nil {
-		log.Fatalf("unable to set mode of %s/current: %v\n",sc.target, err)
+		log.Panicf("unable to set mode of %s/current: %v\n",sc.target, err)
 	}
 	dirOpenFinish(priv, fd, 0)
 }
@@ -180,7 +203,7 @@ func dirFilesfit(sc *scriptLine) (bool,error) {
 
 	dir, err := os.Open(".");
 	if err!=nil { return false, err}
-	defer dir.Close();
+	defer closeLogger(dir, ".");
 	var count uint64
 	oldest:="@z"
 
@@ -199,8 +222,8 @@ func dirFilesfit(sc *scriptLine) (bool,error) {
 	if count < sc.maxFiles {
 		return true, nil
 	}
-	os.Remove(oldest)
-	return false,nil;
+	err = os.Remove(oldest)
+	return false,err;
 }
 func dirWriterLoop(sc *scriptLine, buf[]byte) {
 	priv := (*dirOutputPrivate)(sc.desc.private.(*dirOutputPrivate))
@@ -274,7 +297,7 @@ func dirStartProcessor(sc *scriptLine) (*os.Process, error) {
 		return nil, err
 	}
 	finfo=append(finfo,fd)
-	defer fd.Close()
+	defer closeLogger(fd, "previous")
 
 	// stdout
 	fd, err = openTrunc("processed")
@@ -282,7 +305,7 @@ func dirStartProcessor(sc *scriptLine) (*os.Process, error) {
 		return nil, err
 	}
 	finfo=append(finfo,fd)
-	defer fd.Close()
+	defer closeLogger(fd, "processed")
 
 	// 2
 	finfo=append(finfo,os.Stderr)
@@ -295,7 +318,7 @@ func dirStartProcessor(sc *scriptLine) (*os.Process, error) {
 		return nil, err
 	}
 	finfo=append(finfo,fd)
-	defer fd.Close()
+	defer closeLogger(fd, "state")
 
 	//4
 	fd, err = openTrunc("newstate")
@@ -303,7 +326,7 @@ func dirStartProcessor(sc *scriptLine) (*os.Process, error) {
 		return nil, err
 	}
 	finfo=append(finfo,fd)
-	defer fd.Close()
+	defer closeLogger(fd, "newstate")
 
 	attr:=new(os.ProcAttr)
 	attr.Files=finfo
@@ -330,7 +353,7 @@ func dirFullCurrent(sc *scriptLine) {
 
 	oldDir := dirOpenLoop(".")
 	var err error
-	defer oldDir.Chdir()
+	defer chdirLoop(oldDir,".")
 	closeOnExec(oldDir);
 
 	for  {
@@ -342,7 +365,7 @@ func dirFullCurrent(sc *scriptLine) {
 		time.Sleep(time.Second)
 	}
 	fsyncLoop(sc, "current", priv.fd)
-	priv.fd.Close()
+	_ = priv.fd.Close()
 
 	renameLoop(sc,"current","previous");
 
@@ -389,11 +412,11 @@ func dirFullCurrent(sc *scriptLine) {
 	fd = openAppendLoop(sc,"processed")
 	fsyncLoop(sc,"processed",fd)
 	chmodLoop(sc,"processed",fd,0744)
-	fd.Close()
+	_ = fd.Close()
 
 	fd = openAppendLoop(sc,"newstate")
 	fsyncLoop(sc,"newstate",fd)
-	fd.Close()
+	_ = fd.Close()
 
 	removeLoop(sc,"previous")
 	renameLoop(sc,"newstate", "state")
@@ -433,7 +456,7 @@ func chmodLoop(sc *scriptLine, fn string, fd *os.File, mode os.FileMode) {
 func removeLoop(sc *scriptLine, fn string) {
 	for {
 		err := os.Remove(fn)
-		if err==nil {
+		if err==nil || errors.Is(err,os.ErrNotExist) {
 			return
 		}
 		log.Printf("unable to unlink %s/%s, pausing: %v\n",sc.target, fn, err)
