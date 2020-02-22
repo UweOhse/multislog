@@ -332,7 +332,7 @@ func main() {
 	log.SetFlags(0); // don't want a date, messes up self check
 	if len(os.Args)==2 {
 		if os.Args[1]=="-v" || os.Args[1]=="--version" {
-			fmt.Printf("multislog ...\n");
+			fmt.Printf("multislog %v.\n", versionString);
 			return
 		}
 	}

@@ -43,4 +43,6 @@ coverhtmlupload: cover.html
 
 cover.html: cover.out
 	go tool cover --html=cover.out -o cover.html
-	
+
+clean:
+	rm -f cover.out cover.html multislog multislog.test
