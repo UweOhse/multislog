@@ -4,17 +4,12 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	// "io/ioutil"
 	"log"
-	// "bufio"
 	"syscall"
 	"os"
 	"errors"
 	"os/signal"
 	"strconv"
-	"time"
-	// 	"strings"
-	// "time"
 	syslog "github.com/RackSec/srslog"
 )
 
@@ -164,8 +159,6 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 }
 
 
-
-
 func setupScript() {
 	flagTS := false
 	var maxFiles uint64 = 10
@@ -263,7 +256,8 @@ type syncReadData struct {
 	isComplete bool
 	line []byte
 }
-func makeReadChan(r io.Reader, bufSize int) (chan syncReadData, chan error) {
+
+func makeReadChan(r io.Reader, bufSize int) (datachan chan syncReadData, errchan chan error) {
 	readc := make(chan syncReadData,1)
 	errc := make(chan error, 1)
 	go func() {
@@ -271,7 +265,7 @@ func makeReadChan(r io.Reader, bufSize int) (chan syncReadData, chan error) {
 		readbuf := make([]byte, Buflen)
 		for {
 			sd := new(syncReadData)
-			sd.line=*new([]byte)
+			sd.line=[]byte(nil)
 			n, err := r.Read(readbuf)
 			if n!= 0 {
 				curbuf=append(curbuf,readbuf[:n]...)
@@ -305,7 +299,6 @@ func makeReadChan(r io.Reader, bufSize int) (chan syncReadData, chan error) {
 			}
 			if len(curbuf)>=Buflen {
 				sd.line=append(sd.line, curbuf...)
-				// sd.line=curbuf
 				sd.isComplete=false
 				curbuf=curbuf[:0]
 				readc <- *sd
