@@ -4,12 +4,10 @@ import (
 	"time"
 	"log"
 	"os"
-	"bufio"
 )
 
 type fileOutputPrivate struct {
 	fd *os.File
-	writer *bufio.Writer
 
 }
 func newFileOutputDesc() *outputDesc {
