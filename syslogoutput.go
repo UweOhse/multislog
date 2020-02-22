@@ -28,7 +28,6 @@ func syslogOpen(sc *scriptLine) {
 	priv := (*syslogOutputPrivate)(sc.desc.private.(*syslogOutputPrivate))
 	s.SetFormatter(syslog.RFC5424Formatter);
 	priv.fd=s
-	return
 
 }
 
