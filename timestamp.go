@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"time"
 )
 const hex = "0123456789abcdef"
