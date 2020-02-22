@@ -12,10 +12,10 @@ multislog recognizes a number of additional script actions.
   send selected lines to a syslog server (by TCP).
 
 * pfacility.severity
-  set syslog facility ("user", "kern", "mail" and so on) and severity ("debug", "info", "crit" ...).
+  set syslog facility ("user", "kern", "mail" and so on) and severity ("debug", "info", "crit" ...) for the following syslog actions.
 
 * imsgid
-  set the syslog MSGID to `msgid`. Note that MSGID in the lingua of RFC5424 doesn't identify the message, but the type of a message (or rather a kind of classification).
+  set the syslog MSGID for the following syslog actions to `msgid`. Note that MSGID in the lingua of RFC5424 doesn't identify the message, but the type of a message (or rather a kind of classification).
   use a `-` if in doubt (but that's the default anyway).
 
 * t (timestamp)
@@ -23,6 +23,13 @@ multislog recognizes a number of additional script actions.
 
 * t-
   turns the timestamping off.
+
+* d
+  ends the processing of the current line.
+  use this, for example, to send a line with 
+      multislog \
+         -* +error: plocal0.error @127.0.0.1:514 d \
+         +* plocal0.info @127.0.0.1:514
 
 ### Recommendations
 
