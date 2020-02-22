@@ -287,3 +287,12 @@ unable to understand tbad
 --- multilog $ is unknown
 unable to understand $
 1
+--- multilog d(one) works
+0
+--- multilog d(one) works if selected
+0123456789abcde
+0
+oldstuff, must not change
+--- multilog d(one) does not break loop if unselected
+0
+0123456789abcde
