@@ -21,10 +21,11 @@ version.go: Makefile version.in
 
 style:
 	go vet $(SRC)
-	errcheck
 	staticcheck .
-	gocritic check -enable='#diagnostic,#experimental,#performace,#style,#opionionated' ./...
-	gosec ./...
+	gosec -conf ~/etc/gosec.conf.json ./...
+	gocritic check -enable='#diagnostic,#experimental,#performace,#style,#opionionated' \
+		-disable octalLiteral ./...
+	errcheck
 
 check test: multislog
 	sh test.sh >test.out 
