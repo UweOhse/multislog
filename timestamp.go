@@ -6,7 +6,7 @@ import (
 )
 const hex = "0123456789abcdef"
 
-func timestamp() ([]byte,time.Time) {
+func timestamp() ([]byte) {
 	buf:=make([]byte,12)
 	out:=make([]byte,25)
 	now:=time.Now();
@@ -35,7 +35,7 @@ func timestamp() ([]byte,time.Time) {
 		t=(buf[i])&15;
 		out[i*2+2]=hex[t]
 	}
-	return out, now
+	return out
 }
 
 
