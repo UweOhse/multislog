@@ -313,8 +313,26 @@ echo 0123456789abcde | $M tbad e 2>&1 ; echo $?
 docover
 echo '--- multilog i is known'
 echo 0123456789abcde | $M imsgid e 2>&1 ; echo $?
+docover
+
 echo '--- multilog $ is unknown'
 echo 0123456789abcde | $M \$ e 2>&1 ; echo $?
+docover
+
+echo '--- multilog d(one) works'
+echo 0123456789abcde | $M d e 2>&1 ; echo $?
+docover
+
+echo '--- multilog d(one) works if selected'
+echo oldstuff, must not change >test.status
+echo 0123456789abcde | $M "-*" +0* e d =test.status 2>&1 ; echo $?
+cat test.status | head -1
+docover
+
+echo '--- multilog d(one) does not break loop if unselected'
+echo oldstuff, must change >test.status
+echo 0123456789abcde | $M "-*" e d +0* =test.status 2>&1 ; echo $?
+cat test.status | head -1
 docover
 
 if test "$COVER" = "1" ; then
