@@ -61,7 +61,6 @@ type scriptLine struct {
 
 var script []scriptLine
 var curTaiaTimestamp []byte
-var curTime time.Time
 
 func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan chan bool) {
 	// limit the memory usage and the influence of core dumps inserted into logs.
@@ -338,7 +337,7 @@ func main() {
 	}
 
 	// so that the dir* functions have a valid time stamp
-	curTaiaTimestamp, curTime=timestamp()
+	curTaiaTimestamp=timestamp()
 
 	ev,ok := os.LookupEnv("MULTISLOG_BUFLEN")
 	if ok {
