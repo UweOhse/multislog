@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"log"
 	"syscall"
 	"errors"
@@ -33,7 +32,7 @@ func newDirOutputDesc() *outputDesc {
 }
 
 
-func dirFinish(sc *scriptLine, fn string, code string) {
+func dirFinish(sc *scriptLine, fn, code string) {
 	var st os.FileInfo
 	var err error
 	for {
@@ -135,7 +134,8 @@ func dirOpen(sc *scriptLine) {
 			return
 		}
 	}
-	// os.Remove("state");
+
+	// os.Remove("state"); // why was this done?
 	os.Remove("newstate");
 
 	flagProcessed:=false
@@ -276,7 +276,7 @@ func dirStartProcessor(sc *scriptLine) (*os.Process, error) {
 	finfo=append(finfo,fd)
 	defer fd.Close()
 
-	//stdout
+	// stdout
 	fd, err = openTrunc("processed")
 	if err!=nil {
 		return nil, err
