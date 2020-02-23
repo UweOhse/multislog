@@ -335,6 +335,23 @@ echo 0123456789abcde | $M "-*" e d +0* =test.status 2>&1 ; echo $?
 cat test.status | head -1
 docover
 
+# this checks the d bug where d did lead to not clearing the selected flag on later things.
+echo '--- multilog longer match'
+echo oldstuff, must change >test.status
+echo oldstuff, must change2 >test2.status
+(
+  echo "delivery 7850: failure: Sorry,_I_couldn't_find_a_mail_exchanger_or_IP_address._(#5.4.4)/"
+  echo "starting delivery 7850: msg ..."
+  echo "delivery 7851: failure: Sorry,_I_couldn't_find_a_mail_exchanger_or_IP_address._(#5.4.4)/"
+) | \
+	$M "-*" "+delivery *: failure:*" =test.status d \
+	"+*" =test2.status \
+	2>&1 ; echo $?
+cat test.status | head -1
+cat test2.status | head -1
+docover
+
+
 if test "$COVER" = "1" ; then
 	exit 0
 fi

@@ -103,7 +103,11 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 		/* part2: select channels */
 		selected := true
 		var done=false
-		for i := 0; i < len(script) && !done; i++ {
+		for i := 0; i < len(script); i++ {
+			if done {
+				script[i].selected=false
+				continue
+			}
 			typ:=script[i].typ
 			switch {
 			case typ==acSelect:

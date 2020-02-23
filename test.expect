@@ -296,3 +296,7 @@ oldstuff, must not change
 --- multilog d(one) does not break loop if unselected
 0
 0123456789abcde
+--- multilog longer match
+0
+delivery 7851: failure: Sorry,_I_couldn't_find_a_mail_exchanger_or_IP_address._(#5.4.4)/
+starting delivery 7850: msg ...
