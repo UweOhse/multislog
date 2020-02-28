@@ -203,8 +203,6 @@ func setupScript() {
 			n.typ = acAction
 			n.desc = newFileOutputDesc()
 			n.target = os.Args[i][1:]
-		case 'T': // shorthand.
-			flagTS = tsRFC3339Nano
 		case 't':
 			switch strings.ToLower(os.Args[i]) {
 			case "t":
@@ -220,6 +218,8 @@ func setupScript() {
 			case "trfc3339":
 				flagTS = tsRFC3339
 			case "trfc3339nano":
+				flagTS = tsRFC3339Nano
+			case "tt":
 				flagTS = tsRFC3339Nano
 			default:
 				log.Fatalf("unable to understand %s\n", os.Args[i])
