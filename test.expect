@@ -308,3 +308,9 @@ starting delivery 7850: msg ...
 24 dddddddddddddddd content
 --- multilog tUnixNs: timestamp in seconds since epoch with ns
 27 ddddddddddddddddddd content
+--- multilog tRFC3339: timestamp in RFC3339 format
+33 dddd-dd-ddTdd:dd:dd+dd:dd content
+--- multilog tRFC3339Nano: timestamp in RFC3339 format with ms
+37 dddd-dd-ddTdd:dd:dd.DXX+dd:dd content
+--- multilog T: timestamp in RFC3339 format with ms
+37 dddd-dd-ddTdd:dd:dd.DXX+dd:dd content

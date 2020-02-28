@@ -35,6 +35,8 @@ const (
 	tsEpochMs
 	tsEpochUs
 	tsEpochNs
+	tsRFC3339
+	tsRFC3339Nano
 )
 
 type outputDesc struct {
@@ -201,18 +203,24 @@ func setupScript() {
 			n.typ = acAction
 			n.desc = newFileOutputDesc()
 			n.target = os.Args[i][1:]
+		case 'T': // shorthand.
+			flagTS = tsRFC3339Nano
 		case 't':
-			switch os.Args[i] {
+			switch strings.ToLower(os.Args[i]) {
 			case "t":
 				flagTS = tsTAI64
-			case "tUnix":
+			case "tunix":
 				flagTS = tsEpoch
-			case "tUnixMs":
+			case "tunixms":
 				flagTS = tsEpochMs
-			case "tUnixUs":
+			case "tunixus":
 				flagTS = tsEpochUs
-			case "tUnixNs":
+			case "tunixns":
 				flagTS = tsEpochNs
+			case "trfc3339":
+				flagTS = tsRFC3339
+			case "trfc3339nano":
+				flagTS = tsRFC3339Nano
 			default:
 				log.Fatalf("unable to understand %s\n", os.Args[i])
 			}
