@@ -2,13 +2,33 @@ package main
 
 import (
 	"time"
+	"strconv"
+	"log"
 )
 const hex = "0123456789abcdef"
 
-func timestamp() ([]byte) {
+func timestamp(mode int, now time.Time) ([]byte) {
+	out:=[]byte{}
+	switch mode {
+	case tsNone:
+	case tsTAI64:
+		out=timestamp_tai64(now)
+	case tsEpoch:
+		out=timestamp_epoch(now)
+	default:
+		log.Fatalf("ECANTHAPPEN: timestamps mode is %d\n",mode)
+	}
+	return out
+}
+func timestamp_epoch(now time.Time) ([]byte) {
+	sec:=now.Unix()
+	return []byte(strconv.FormatInt(sec,10))
+}
+
+
+func timestamp_tai64(now time.Time) ([]byte) {
 	buf:=make([]byte,12)
 	out:=make([]byte,25)
-	now:=time.Now();
 	sec:=now.Unix()
 	sec+=4611686018427387914;
 	nano:=now.Nanosecond()

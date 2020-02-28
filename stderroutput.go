@@ -16,8 +16,8 @@ func newStderrOutputDesc() *outputDesc {
 // reality: if is shortens the line then it also appends ...
 func stderrOutputSendStart(sc *scriptLine, inbuf []byte) {
 	buf := make([]byte,0,200)
-	if sc.doTimestamp {
-		buf=append(buf, curTaiaTimestamp...)
+	if sc.timestamp!= tsNone {
+		buf=append(buf, curFormattedTimestamp...)
 		buf=append(buf,' ')
 	}
 	buf=append(buf,inbuf...)

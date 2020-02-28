@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"time"
 	"strings"
 	"log"
 	"syscall"
@@ -27,6 +28,11 @@ const (
 	acDeSelect
 	acDone
 )
+const (
+	tsNone = iota
+	tsTAI64
+	tsEpoch
+)
 
 type outputDesc struct {
 	open func(sc *scriptLine)
@@ -42,7 +48,7 @@ type scriptLine struct {
 	selector    string
 	target      string
 	typ         int
-	doTimestamp bool
+	timestamp   int
 	maxSize     uint64 // acDir only
 	maxFiles    uint64 // acDir only
 	processor   string // acDir only
@@ -56,7 +62,8 @@ type scriptLine struct {
 }
 
 var script []scriptLine
-var curTaiaTimestamp []byte
+var curFormattedTimestamp []byte
+var curTimestamp time.Time
 
 func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan chan bool) {
 	// limit the memory usage and the influence of core dumps inserted into logs.
@@ -98,7 +105,7 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 		if len(sd.line)==0 {
 			continue
 		}
-		curTaiaTimestamp=timestamp()
+		curTimestamp=time.Now()
 
 		/* part2: select channels */
 		selected := true
@@ -129,6 +136,7 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 		/* part3: writing the first part. */
 		for i := 0; i < len(script); i++ {
 			if script[i].selected {
+				curFormattedTimestamp=timestamp(script[i].timestamp, curTimestamp)
 				if script[i].desc!=nil && script[i].desc.sendStart!=nil {
 					script[i].desc.sendStart(&script[i], sd.line)
 				}
@@ -165,7 +173,7 @@ func doit(readChan chan syncReadData, errChan chan error, exitChan, flushChan ch
 
 
 func setupScript() {
-	flagTS := false
+	flagTS := tsNone
 	var maxFiles uint64 = 10
 	var maxSize uint64 = 99999
 	var processor string
@@ -193,12 +201,14 @@ func setupScript() {
 		case 't':
 			if len(os.Args[i])>1 {
 				if os.Args[i][1]=='-' {
-					flagTS = false
+					flagTS = tsNone
+				} else if os.Args[i][1]=='e' {
+					flagTS = tsEpoch
 				} else {
 					log.Fatalf("unable to understand %s\n", os.Args[i])
 				}
 			} else {
-				flagTS = true
+				flagTS = tsTAI64
 			}
 		case '.':
 			n.typ = acAction
@@ -249,7 +259,7 @@ func setupScript() {
 			continue
 		}
 		n.processor=processor
-		n.doTimestamp = flagTS
+		n.timestamp = flagTS
 		n.maxFiles = maxFiles
 		n.maxSize = maxSize
 		n.priority = priority
@@ -340,7 +350,8 @@ func main() {
 	}
 
 	// so that the dir* functions have a valid time stamp
-	curTaiaTimestamp=timestamp()
+	curTimestamp=time.Now()
+	curFormattedTimestamp=timestamp(tsTAI64, curTimestamp)
 
 	ev,ok := os.LookupEnv("MULTISLOG_BUFLEN")
 	if ok {

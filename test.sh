@@ -351,6 +351,9 @@ cat test.status | head -1
 cat test2.status | head -1
 docover
 
+echo '--- multilog te: timestamp in seconds since epoch'
+echo "content" | $M te e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+
 
 if test "$COVER" = "1" ; then
 	exit 0

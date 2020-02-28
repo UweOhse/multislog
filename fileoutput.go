@@ -25,8 +25,8 @@ func newFileOutputDesc() *outputDesc {
  */
 func fileOutputSendStart(sc *scriptLine, buf []byte) {
 	buf2:=make([]byte,0,1001)
-	if sc.doTimestamp {
-		buf2=append(buf2,curTaiaTimestamp...)
+	if sc.timestamp!=tsNone {
+		buf2=append(buf2,curFormattedTimestamp...)
 		buf2=append(buf2,' ')
 	}
 	for _, c := range buf {

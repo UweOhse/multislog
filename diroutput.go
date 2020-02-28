@@ -51,7 +51,7 @@ func dirFinish(sc *scriptLine, fn, code string) {
 	if nlink == 1 {
 		for {
 			buf:=make([]byte,0)
-			buf=append(buf, curTaiaTimestamp...)
+			buf=append(buf, timestamp_tai64(curTimestamp)...)
 
 			buf=append(buf,'.');
 			buf=append(buf,code[0])
@@ -244,8 +244,8 @@ func dirOutputSendStart(sc *scriptLine, buf []byte) {
 	if priv.bytesWritten>=int64(sc.maxSize) {
 		dirFullCurrent(sc)
 	}
-	if sc.doTimestamp {
-		dirWriterLoop(sc, curTaiaTimestamp)
+	if sc.timestamp!=tsNone {
+		dirWriterLoop(sc, curFormattedTimestamp)
 		dirWriterLoop(sc, []byte{' '});
 	}
 	dirWriterLoop(sc, buf);
