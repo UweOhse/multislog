@@ -24,6 +24,23 @@ multislog recognizes a number of additional script actions.
 * t-
   turns the timestamping off.
 
+* tUnix
+  switches the timestamp format to seconds since the epoch (1234567890, for 2009-02-14 00:31:30.000000000+01:00)
+* tUnixMs
+  switches the timestamp format to seconds since the epoch, with milliseconds appended (1234567890123).
+* tUnixUs
+  switches the timestamp format to seconds since the epoch, with microseconds appended (1234567890123456).
+* tUnixNs
+  switches the timestamp format to seconds since the epoch, with nanoseconds appended (1234567890123456789).
+  This is for interoperability with promtail (grafana loki), not for beauty.
+* tRFC3339
+  switches the timestamp format to RFC3339. It uses a T as separator, not a space.
+* tRFC3339Nano
+  switches the timestamp format to RFC3339 with nanoseconds. It uses a T as separator, not a space.
+* tT
+  is a shorthand notation for tRFC3339Nano.
+The t action is case insensitive, by the way.
+
 * d
   ends the processing of the current line.
   use this, for example, to send a line with 
