@@ -207,6 +207,8 @@ func setupScript() {
 			switch strings.ToLower(os.Args[i]) {
 			case "t":
 				flagTS = tsTAI64
+			case "t-":
+				flagTS = tsNone
 			case "tunix":
 				flagTS = tsEpoch
 			case "tunixms":

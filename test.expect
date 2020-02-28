@@ -276,8 +276,8 @@ failed to parse facility use
 --- multilog t t- works
 @xxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxx
 0
-unable to understand t-
-1
+0123456789abcde
+0
 --- multilog tbad fails
 unable to understand tbad
 1
@@ -310,7 +310,7 @@ starting delivery 7850: msg ...
 27 ddddddddddddddddddd content
 --- multilog tRFC3339: timestamp in RFC3339 format
 33 dddd-dd-ddTdd:dd:dd+dd:dd content
---- multilog tRFC3339Nano: timestamp in RFC3339 format with ms
+--- multilog tRFC3339Nano: timestamp in RFC3339 format with ns
 37 dddd-dd-ddTdd:dd:dd.DXX+dd:dd content
---- multilog T: timestamp in RFC3339 format with ms
+--- multilog tT: timestamp in RFC3339 format with ns
 37 dddd-dd-ddTdd:dd:dd.DXX+dd:dd content
