@@ -276,8 +276,8 @@ failed to parse facility use
 --- multilog t t- works
 @xxxxxxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxx
 0
-0123456789abcde
-0
+unable to understand t-
+1
 --- multilog tbad fails
 unable to understand tbad
 1
@@ -300,5 +300,11 @@ oldstuff, must not change
 0
 delivery 7851: failure: Sorry,_I_couldn't_find_a_mail_exchanger_or_IP_address._(#5.4.4)/
 starting delivery 7850: msg ...
---- multilog te: timestamp in seconds since epoch
+--- multilog tUnix: timestamp in seconds since epoch
 18 dddddddddd content
+--- multilog tUnixMs: timestamp in seconds since epoch with ms
+21 ddddddddddddd content
+--- multilog tUnixUs: timestamp in seconds since epoch with us
+24 dddddddddddddddd content
+--- multilog tUnixNs: timestamp in seconds since epoch with ns
+27 ddddddddddddddddddd content

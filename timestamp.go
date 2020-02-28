@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"strconv"
+	"fmt"
 	"log"
 )
 const hex = "0123456789abcdef"
@@ -15,6 +16,12 @@ func timestamp(mode int, now time.Time) ([]byte) {
 		out=timestamp_tai64(now)
 	case tsEpoch:
 		out=timestamp_epoch(now)
+	case tsEpochMs:
+		out=timestamp_epochMs(now)
+	case tsEpochUs:
+		out=timestamp_epochUs(now)
+	case tsEpochNs:
+		out=timestamp_epochNs(now)
 	default:
 		log.Fatalf("ECANTHAPPEN: timestamps mode is %d\n",mode)
 	}
@@ -23,6 +30,21 @@ func timestamp(mode int, now time.Time) ([]byte) {
 func timestamp_epoch(now time.Time) ([]byte) {
 	sec:=now.Unix()
 	return []byte(strconv.FormatInt(sec,10))
+}
+func timestamp_epochMs(now time.Time) ([]byte) {
+	sec:=now.Unix()
+	nano:=now.Nanosecond()
+	return []byte(fmt.Sprintf("%d%03d",sec,nano/1000000))
+}
+func timestamp_epochUs(now time.Time) ([]byte) {
+	sec:=now.Unix()
+	nano:=now.Nanosecond()
+	return []byte(fmt.Sprintf("%d%06d",sec,nano/1000))
+}
+func timestamp_epochNs(now time.Time) ([]byte) {
+	sec:=now.Unix()
+	nano:=now.Nanosecond()
+	return []byte(fmt.Sprintf("%d%09d",sec,nano))
 }
 
 

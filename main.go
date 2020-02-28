@@ -32,6 +32,9 @@ const (
 	tsNone = iota
 	tsTAI64
 	tsEpoch
+	tsEpochMs
+	tsEpochUs
+	tsEpochNs
 )
 
 type outputDesc struct {
@@ -199,16 +202,19 @@ func setupScript() {
 			n.desc = newFileOutputDesc()
 			n.target = os.Args[i][1:]
 		case 't':
-			if len(os.Args[i])>1 {
-				if os.Args[i][1]=='-' {
-					flagTS = tsNone
-				} else if os.Args[i][1]=='e' {
-					flagTS = tsEpoch
-				} else {
-					log.Fatalf("unable to understand %s\n", os.Args[i])
-				}
-			} else {
+			switch os.Args[i] {
+			case "t":
 				flagTS = tsTAI64
+			case "tUnix":
+				flagTS = tsEpoch
+			case "tUnixMs":
+				flagTS = tsEpochMs
+			case "tUnixUs":
+				flagTS = tsEpochUs
+			case "tUnixNs":
+				flagTS = tsEpochNs
+			default:
+				log.Fatalf("unable to understand %s\n", os.Args[i])
 			}
 		case '.':
 			n.typ = acAction

@@ -351,8 +351,14 @@ cat test.status | head -1
 cat test2.status | head -1
 docover
 
-echo '--- multilog te: timestamp in seconds since epoch'
-echo "content" | $M te e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+echo '--- multilog tUnix: timestamp in seconds since epoch'
+echo "content" | $M tUnix e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+echo '--- multilog tUnixMs: timestamp in seconds since epoch with ms'
+echo "content" | $M tUnixMs e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+echo '--- multilog tUnixUs: timestamp in seconds since epoch with us'
+echo "content" | $M tUnixUs e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+echo '--- multilog tUnixNs: timestamp in seconds since epoch with ns'
+echo "content" | $M tUnixNs e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
 
 
 if test "$COVER" = "1" ; then
