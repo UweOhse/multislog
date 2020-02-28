@@ -22,6 +22,8 @@ func timestamp(mode int, now time.Time) ([]byte) {
 		out=timestamp_epochUs(now)
 	case tsEpochNs:
 		out=timestamp_epochNs(now)
+	case tsRFC3339:
+		out=timestamp_RFC3339(now)
 	default:
 		log.Fatalf("ECANTHAPPEN: timestamps mode is %d\n",mode)
 	}
@@ -45,6 +47,9 @@ func timestamp_epochNs(now time.Time) ([]byte) {
 	sec:=now.Unix()
 	nano:=now.Nanosecond()
 	return []byte(fmt.Sprintf("%d%09d",sec,nano))
+}
+func timestamp_RFC3339(now time.Time) ([]byte) {
+	return []byte(time.Format(time.RFC3339))
 }
 
 
