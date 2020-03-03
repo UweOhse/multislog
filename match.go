@@ -3,32 +3,32 @@ package main
 func match(pat, buf string) bool {
 	var pi, bi int
 	for {
-		if pi==len(pat) {
-			return bi==len(buf)
+		if pi == len(pat) {
+			return bi == len(buf)
 		}
-		ch:=pat[pi]
+		ch := pat[pi]
 		pi++
 		if ch == '*' {
 			// star at the end matches.
-			if pi==len(pat) {
+			if pi == len(pat) {
 				return true
 			}
-			ch=pat[pi]
+			ch = pat[pi]
 			for {
-				if bi==len(buf) {
+				if bi == len(buf) {
 					return false
 				}
-				if buf[bi]==ch {
-					break;
+				if buf[bi] == ch {
+					break
 				}
 				bi++
 			}
 			continue
 		}
-		if bi==len(buf) {
+		if bi == len(buf) {
 			return false
 		}
-		if buf[bi]!=ch {
+		if buf[bi] != ch {
 			return false
 		}
 		bi++

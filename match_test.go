@@ -1,8 +1,9 @@
 package main
+
 import "testing"
 
 func TestMatch(t *testing.T) {
-	tab:=[]struct {
+	tab := []struct {
 		pat string
 		str string
 		res bool
@@ -61,12 +62,12 @@ func TestMatch(t *testing.T) {
 		{"* * one", "one", false},
 		{"* * one", " one", false},
 		{"* * one", "   one", false},
-		{"* *  one","   one", true},
+		{"* *  one", "   one", true},
 	}
-	for _,entry := range tab {
-		res:=match(entry.pat, entry.str)
-		if res!= entry.res {
-			t.Errorf("match(%s,%s) returned not %v, but %v", 
+	for _, entry := range tab {
+		res := match(entry.pat, entry.str)
+		if res != entry.res {
+			t.Errorf("match(%s,%s) returned not %v, but %v",
 				entry.pat, entry.str, entry.res, res)
 		}
 	}
