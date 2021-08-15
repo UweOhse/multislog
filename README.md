@@ -8,8 +8,13 @@ The main purpose of this tool is to store log messages in a way compatible to mu
 
 multislog recognizes a number of additional script actions.
 
+* @tcp:host:port
 * @sysloghost:port
   send selected lines to a syslog server (by TCP).
+* @udp:host:port
+  send selected lines to a syslog server (by UDP).
+* @unix
+  send selected lines to the local syslog server (by unix domain socket).
 
 * pfacility.severity
   set syslog facility ("user", "kern", "mail" and so on) and severity ("debug", "info", "crit" ...) for the following syslog actions.
@@ -53,9 +58,15 @@ The t action is case insensitive, by the way.
 * do not send multislog (and multilog) a TERM signal if you can avoid it. Just stop the message sender instead.
   There is no way multislog can ever be sure that it has read every message the sender sent.
 
-* do not send messages to syslog only if you value them. Right now there is no way the receiving syslog server can signal it got a message (a protocol limitation). The use of TCP means that a limited number of messages will be lost if a syslog server goes down, but messages can get lost, anyway.
+* if you value your log entries, do not send them to syslog only. Right now there is no way the receiving syslog server can signal it got a message (a protocol limitation).
 
-* the use of TCP means that multilog will hang if it cannot write to the remote syslog server. This is the right behaviour in my use case, but possibly not in yours.
+* TCP: a limited number of messages will be lost if a syslog server goes down, but messages can get lost, anyway (things can be worse with udp and unix sockets).
+
+* TCP: multilog will hang if it cannot write to the remote syslog server.
+
+* UDP: multilog will NOT hang if it cannot write to the remote syslog server, it will "just" lose the messages. 
+
+* UNIX domain sockets: multilog will NOT hang, it will lose messages instead.
 
 ## License
 
@@ -67,13 +78,21 @@ make install
 ```
 will compile the program and install it into /usr/local/bin . You need a working go installation for it.
 
+## Releases
+
+* Version 0.2: 
+  - add @unix, @tcp:, @udp:
+* Version 0.1: 
+  - the original release
+
 ## Security
-Well, if i can get you to install this without doing at least a short code audit, you do not need to worry about security. believe me: if you install software just because you found it on github your computers security depends on luck alone.
+If i can get you to install this without doing at least a short code audit, you do not need to worry about security.
+Believe me: your computers security depends on luck alone if you install software just because you found it on github.
 
 So, you did the audit? Yeah, my variable naming sucks.
 
-Now continue, and audit the 2 packages imported.
+Now continue, and audit the 2 non-standard packages imported.
 
-That's too much work? Well, yes. I thought the same and didn't audit them, too. Possibly nobody ever will bother to do that. Maybe i should bite the bullet and not use the prometheus libraries, but right now i fail to find the motivation for that.
+That's too much work? Well, yes. I thought the same and didn't audit them, too. Possibly nobody ever will bother to do that.
 
-Computer security in 2020 sucks.
+Computer security in 2020/2021 sucks.

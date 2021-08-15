@@ -1,5 +1,5 @@
 PREFIX=/usr/local
-VERSION=0.1
+VERSION=0.2
 G=`git rev-list HEAD | head -1`
 
 SRC=main.go version.go match.go parse.go timestamp.go ioutils.go \
@@ -47,3 +47,19 @@ cover.html: cover.out
 
 clean:
 	rm -f cover.out cover.html multislog multislog.test
+
+build-release: all check-release-info check-git-tag
+	git archive --prefix multislog-$(VERSION)/ -o tmp.multislog-$(VERSION).tar.gz v$(VERSION)
+	rm -rf releasebuild
+	mkdir releasebuild
+	(cd releasebuild; tar xzf ../tmp.multislog-$(VERSION).tar.gz --strip-components 1 )
+	(cd releasebuild ; make check)
+	rm -rf releasebuild
+	mv tmp.multislog-$(VERSION).tar.gz multislog-$(VERSION).tar.gz
+
+check-release-info:
+	@fgrep "Version $(VERSION):" README.md >/dev/null || ( echo "no Release info in README.me" ; exit 1 )
+
+check-git-tag:
+	@git tag -l v$(VERSION) | grep '^v$(VERSION)$$' >/dev/null || ( echo "no Release tag in git" ; exit 1 )
+

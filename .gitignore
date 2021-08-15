@@ -1,3 +1,6 @@
 *.swp
 multislog
 multislog.test
+multislog-*tar.gz
+cover.out
+test.out

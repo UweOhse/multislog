@@ -19,7 +19,18 @@ func newSyslogOutputDesc() *outputDesc {
 }
 
 func syslogOpen(sc *scriptLine) {
-	s, err := syslog.Dial("tcp", sc.target,
+	target:=sc.target
+	proto:="tcp"
+	if target[0:4]=="udp:" {
+		proto="udp"
+		target=target[4:]
+	} else if target[0:4]=="tcp:" {
+		target=target[4:]
+	} else if target=="unix" {
+		target=""
+		proto=""
+	}
+	s, err := syslog.Dial(proto, target,
 		syslog.LOG_INFO|syslog.LOG_DAEMON, sc.msgid)
 	if err != nil {
 		log.Fatalf("failed to open syslog %s: %v\n", sc.target, err)
