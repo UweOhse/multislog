@@ -34,6 +34,9 @@ cover: cover.out
 
 cover.out: multislog.test
 	COVER=1 sh test.sh >/dev/null
+	go test -coverpkg="./..." -v -test.coverprofile=cover1.out
+	gocovmerge cover.out cover1.out >t.out
+	mv t.out cover.out
 	go tool cover -func cover.out
 
 multislog.test: $(SRC)

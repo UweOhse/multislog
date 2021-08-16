@@ -353,20 +353,27 @@ docover
 
 echo '--- multilog tUnix: timestamp in seconds since epoch'
 echo "content" | $M tUnix e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+docover
 echo '--- multilog tUnixMs: timestamp in seconds since epoch with ms'
 echo "content" | $M tUnixMs e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+docover
 echo '--- multilog tUnixUs: timestamp in seconds since epoch with us'
 echo "content" | $M tUnixUs e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+docover
 echo '--- multilog tUnixNs: timestamp in seconds since epoch with ns'
 echo "content" | $M tUnixNs e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+docover
 echo '--- multilog tRFC3339: timestamp in RFC3339 format'
 echo "content" | TZ=MET $M tRFC3339 e 2>&1 | sed 's/[0-9]/d/g' |awk '{print length($0)" "$0}'
+docover
 echo '--- multilog tRFC3339Nano: timestamp in RFC3339 format with ns'
 # trailing zeros are omitted in 339Nano...
 echo "content" | TZ=MET $M tRFC3339Nano e 2>&1 | sed 's/[0-9]/d/g' | sed 's/d*+/DXX+/' |awk '{print length($0)" "$0}'
+docover
 echo '--- multilog tT: timestamp in RFC3339 format with ns'
 # trailing zeros are omitted in 339Nano...
 echo "content" | TZ=MET $M tT e 2>&1 | sed 's/[0-9]/d/g' | sed 's/d*+/DXX+/' |awk '{print length($0)" "$0}'
+docover
 
 
 if test "$COVER" = "1" ; then

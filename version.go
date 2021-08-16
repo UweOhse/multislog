@@ -1,3 +1,3 @@
 package main
 
-var versionString string = "0.1 (git 586e09b7457fbfff323f572eae53d1ce484bdd53)"
+var versionString string = "0.2 (git 2474473c2d45ecb323d120825071236b30afc44b)"

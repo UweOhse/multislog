@@ -3,4 +3,5 @@ multislog
 multislog.test
 multislog-*tar.gz
 cover.out
+cover1.out
 test.out
