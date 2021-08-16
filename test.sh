@@ -12,8 +12,7 @@ PATH=".:$PATH"
 
 mkdir test.tmp.$$ || exit 1
 cd test.tmp.$$
-function cleanup()
-{
+cleanup() {
 	if test "$COVER" = 1 ; then
 		mv cover.out ..
 	fi
@@ -28,8 +27,7 @@ if test "$COVER" = "1" ; then
 	echo | $M -- --version
 	mv cover1.out cover.out
 fi
-function docover()
-{
+docover() {
 	if test "$COVER" = 1 ; then
 		gocovmerge cover.out cover1.out >t.out
 		mv t.out cover.out
@@ -160,7 +158,7 @@ cat x/current
 od -tx1 x/@*
 
 # deliberate change from multilog behaviour: multilog deletes state at start, which at least is
-# undocumentated behaviour, but at most possibly a bug.
+# undocumentated behaviour, but most likely a bug.
 echo '--- multilog ./x !sed works with state'
 rm x/@* x/current
 echo 'eeeeee' >x/state
@@ -176,7 +174,7 @@ rm -rf x
 
 echo '--- multilog ./x ! repeats if processor fails'
 ( for i in `seq 1 257` ; do echo 0123456789abcde ; done ) | \
-	$M n2 s4096 "!if test -f testflag ; then echo done ; exit 0; else echo failed; touch testflag ; exit 1; fi " ./x ; echo $?
+	$M n2 s4096 "!if test -f testflag ; then echo done ; exit 0; else echo failed; touch testflag ; exit 1; fi " ./x 2>/dev/null ; echo $?
 	docover
 cat x/current
 cat x/@*
